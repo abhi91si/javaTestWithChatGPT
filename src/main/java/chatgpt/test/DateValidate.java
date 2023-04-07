@@ -83,6 +83,7 @@ public class DateValidate {
         workbook.close();
     }
     
+	//checking if List has Integer objects
     public static boolean isListDouble(List<String> list) {
     	try {
     		for (String obj : list) {
@@ -94,6 +95,7 @@ public class DateValidate {
         return false;
     }
     
+    //checking if List has strings that can be parsed as dates
     public static boolean isListDate(List<?> list) {
         DateFormat dateFormat1 = new SimpleDateFormat("dd/MM/yyyy");
         DateFormat dateFormat2 = new SimpleDateFormat("dd-MM-yyyy");
