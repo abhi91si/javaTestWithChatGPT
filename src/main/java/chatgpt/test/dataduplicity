@@ -1,0 +1,35 @@
+#code for data duplicity
+
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.HashSet;
+import java.util.Set;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+
+public class ExcelDuplicityChecker {
+    public static void main(String[] args) {
+        String fileName = "example.xls"; // Replace with your Excel file name
+        Set<String> dataSet = new HashSet<>(); // Set to hold unique data values
+        try {
+            FileInputStream file = new FileInputStream(fileName);
+            Workbook workbook = new HSSFWorkbook(file); // For .xls extension files
+            Sheet sheet = workbook.getSheetAt(0); // Assuming data is in the first sheet
+            for (Row row : sheet) {
+                Cell cell = row.getCell(0); // Assuming data is in the first column
+                String data = cell.getStringCellValue();
+                if (dataSet.contains(data)) {
+                    System.out.println("Duplicate found: " + data);
+                } else {
+                    dataSet.add(data);
+                }
+            }
+            file.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+}
