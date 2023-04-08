@@ -65,6 +65,7 @@ public class ExcelReader {
         }
         //check number format
         DateAndNumberValidator.checkNumberAndDateFormat(filename);
+        ExcelEvaluator.evaluate(filename);
 
         // display contents of Excel file
         for (Row row : sheet) {

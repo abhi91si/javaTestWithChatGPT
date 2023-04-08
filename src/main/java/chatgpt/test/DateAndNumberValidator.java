@@ -86,7 +86,8 @@ public class DateAndNumberValidator {
 	public static void checkForValidDates(FileInputStream fileInputStream, Sheet sheet) {
 		for (int i = 0; i < COLUMN_DATE_NAMES.length; i++) {
 			try {
-				List<String> dates = checkForValidDates(fileInputStream, sheet, COLUMN_DATE_NAMES[i]);
+				List<String> dates = ExcelUtil.getColumnValueInList(fileInputStream, sheet, COLUMN_DATE_NAMES[i], Boolean.TRUE);
+				
 				checkForValidDates(dates);
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
@@ -94,46 +95,7 @@ public class DateAndNumberValidator {
 			}	
 		}			
 	}
-	
-	public static List<String> checkForValidDates(FileInputStream fileInputStream, Sheet sheet, String columnname) throws IOException {
-
-        List<String> dates = new ArrayList<String>();
-        int columnIndex = -1;
-        Row headerRow = sheet.getRow(0);
-        Iterator<Cell> headerCellIterator = headerRow.cellIterator();
-        while (headerCellIterator.hasNext()) {
-            Cell cell = headerCellIterator.next();
-            String headerCellValue = cell.getStringCellValue();
-            if (headerCellValue.equalsIgnoreCase(columnname)) {
-                columnIndex = cell.getColumnIndex();
-                break;
-            }
-        }
-
-        Iterator<Row> rowIterator = sheet.rowIterator();
-        rowIterator.next(); // Skip header row
-
-        while (rowIterator.hasNext()) {
-            Row row = rowIterator.next();
-            Cell cell = row.getCell(columnIndex);
-            if (cell != null && cell.getCellType() != CellType.BLANK) {
-                String cellValue;
-                if (cell.getCellType() == CellType.NUMERIC) {
-                    SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
-                    cellValue = dateFormat.format(cell.getDateCellValue());
-                } else {
-                    DataFormatter dataFormatter = new DataFormatter();
-                    cellValue = dataFormatter.formatCellValue(cell);
-                }
-                if (!cellValue.isEmpty()) {
-                    dates.add(cellValue);
-                }
-            }
-        }
-        return dates;
-    }
-	
-    
+	   
 	//checking if List has Integer objects
     public static boolean checkForValidAmount(List<String> list) {
     	try {
