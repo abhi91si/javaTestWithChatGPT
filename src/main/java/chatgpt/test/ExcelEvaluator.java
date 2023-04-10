@@ -3,6 +3,7 @@ package chatgpt.test;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.text.DecimalFormat;
 import java.util.List;
 
 import org.apache.poi.EncryptedDocumentException;
@@ -316,7 +317,7 @@ public class ExcelEvaluator {
                 categoryWiseProjectedClaims.put(category, projectedQuarterClaims);
             }
             for (String category : categoryWiseProjectedClaims.keySet()) {
-                System.out.println("Category: " + category + ", Projected claims for next quarter: " + categoryWiseProjectedClaims.get(category));
+                System.out.println("Category: " + category + ", Projected claims for next quarter: " +  new DecimalFormat("#.##").format(categoryWiseProjectedClaims.get(category)));
             }
             workbook.close();
         } catch (Exception e) {
