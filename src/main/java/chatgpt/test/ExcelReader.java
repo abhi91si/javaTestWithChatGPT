@@ -64,7 +64,8 @@ public class ExcelReader {
             uniqueRows.add(rowString.toString());
         }
         //check number format
-        DateValidate.checkNumberAndDateFormat(filename);
+        DateAndNumberValidator.checkNumberAndDateFormat(filename);
+        ExcelEvaluator.evaluate(filename);
 
         // display contents of Excel file
         for (Row row : sheet) {
