@@ -31,7 +31,8 @@ public class ExcelValidator {
         reader.checkDuplicateRowsAndColumns(sheet);
 
         //check number format
-        DateAndNumberValidator.checkNumberAndDateFormat(filename);
+        DateAndNumberValidator.checkNumberAndDateFormat(filename);        
+        workbook.close();
     }
     
     // display contents of Excel file

@@ -90,11 +90,11 @@ public class ExcelEvaluator {
 			}
 			System.out.print("\nDo you want to see more evaluations ? (For YES press 'Y'/ For NO press any value ): ");
 		} while (input.next().equalsIgnoreCase("y"));
-		System.out.println("Thank you !!");		
-
+		
 		// Close workbook and input stream
 		workbook.close();
 		fileInputStream.close();
+		System.out.println("Thank you !!");		
 	}
 
 	public static void getClaimsStatus(FileInputStream fileInputStream, Sheet sheet) throws IOException {
