@@ -68,7 +68,6 @@ public class ExcelEvaluator {
 			switch (choice) {
 			case 1:
 				getClaimsStatus(fileInputStream, sheet);
-				getClaimApprovedAndSubmittedStatus(fileInputStream, sheet);
 				break;
 			case 2:
 				getCategoryWiseClaims(filename);
