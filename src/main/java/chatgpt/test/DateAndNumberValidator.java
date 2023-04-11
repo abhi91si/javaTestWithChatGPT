@@ -30,7 +30,6 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 
-
 public class DateAndNumberValidator {
 	
 	private static final String[] COLUMN_DATE_NAMES = {"ReceiptDate", "SubmissionDate", "ApprovalDate"};
@@ -57,7 +56,10 @@ public class DateAndNumberValidator {
 	        
 	        // Iterate over the rows starting from the second row (to skip the first row)
 	        Iterator<Row> rowIterator = sheet.iterator();
-	        if(rowIterator.hasNext()) rowIterator.next(); // skip first row
+	        if(rowIterator.hasNext()) {
+	        	rowIterator.next(); // skip first row
+	        }	        	
+	        
 	        while (rowIterator.hasNext()) {
 	            Row row = rowIterator.next();
 	            
@@ -76,8 +78,6 @@ public class DateAndNumberValidator {
 	            	approve.add(approvedAmountString);
 	            }           
 	        }
-	        System.out.println(claim);
-	        System.out.println(approve);
 	        
 	        checkForValidAmount(claim);
 	        checkForValidAmount(approve);      
@@ -86,8 +86,7 @@ public class DateAndNumberValidator {
 	public static void checkForValidDates(FileInputStream fileInputStream, Sheet sheet) {
 		for (int i = 0; i < COLUMN_DATE_NAMES.length; i++) {
 			try {
-				List<String> dates = ExcelUtil.getColumnValueInList(fileInputStream, sheet, COLUMN_DATE_NAMES[i], Boolean.TRUE);
-				
+				List<String> dates = ExcelUtil.getColumnValueInList(fileInputStream, sheet, COLUMN_DATE_NAMES[i], Boolean.TRUE);				
 				checkForValidDates(dates);
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
@@ -100,17 +99,20 @@ public class DateAndNumberValidator {
     public static boolean checkForValidAmount(List<String> list) {
     	try {
     		for (String obj : list) {
-    			Integer.parseInt(obj);
+    			int amount = Integer.parseInt(obj);
+    			if(amount < 0) {
+    				System.out.println("check the Amount value, value should be a positive number, check :"+amount);
+    				System.exit(1);
+    			}
     		}
     	}catch(Exception e) {
-    		System.out.println("check amount value "+e.getMessage());
+    		System.out.println("check the Amount value, value should be a number "+e.getMessage());
     	}
         return false;
     }
     
     //checking if List has strings that can be parsed as dates 
     public static void checkForValidDates(List<String> listWithDate){
-    	//String regex = "^(1[0-2]|0[1-9])/(3[01]|[12][0-9]|0[1-9])/[0-9]{4}$";
     	String regex = "^(0[1-9]|[1-2][0-9]|3[01])/(0[1-9]|1[0-2])/(\\d{4})$";
     	 
     	Pattern pattern = Pattern.compile(regex);
@@ -118,7 +120,10 @@ public class DateAndNumberValidator {
     	for(String date : listWithDate)
     	{
     	  Matcher matcher = pattern.matcher(date);
-    	  System.out.println(date +" : "+ matcher.matches());
+    	  if(!matcher.matches()) {
+    		 System.out.println("Date has to be in dd/mm/yyyy format, check :"+date);  
+    		 System.exit(1);
+    	  }
     	}
     }
 
