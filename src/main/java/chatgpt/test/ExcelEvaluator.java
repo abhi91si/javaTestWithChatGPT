@@ -20,6 +20,8 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.ss.usermodel.Row;
+
+import java.text.DateFormatSymbols;
 import java.text.DecimalFormat;
 import java.util.List;
 
@@ -66,12 +68,13 @@ public class ExcelEvaluator {
 			switch (choice) {
 			case 1:
 				getClaimsStatus(fileInputStream, sheet);
+				getClaimApprovedAndSubmittedStatus(fileInputStream, sheet);
 				break;
 			case 2:
 				getCategoryWiseClaims(filename);
 				break;
 			case 3:
-				getClaimApprovedAndSubmittedStatus(filename);
+				getClaimApprovedAndSubmittedStatus(fileInputStream, sheet);
 				break;
 			case 4:
 				claimProjections(filename);
@@ -79,16 +82,20 @@ public class ExcelEvaluator {
 			case 5:
 				getClaimsStatus(fileInputStream, sheet);
 				getCategoryWiseClaims(filename);
-				getClaimApprovedAndSubmittedStatus(filename);
+				getClaimApprovedAndSubmittedStatus(fileInputStream, sheet);
 				claimProjections(filename);
 				break;
 			default:
 				System.out.println("Invalid input. Please enter a number between 1 and 5.");
 				break;
 			}
-			System.out.print("\nDo you want to see more evaluations ? (y/n): ");
+			System.out.print("\nDo you want to see more evaluations ? (For YES press 'Y'/ For NO press any value ): ");
 		} while (input.next().equalsIgnoreCase("y"));
-		System.out.println("Thank you !!");
+		System.out.println("Thank you !!");		
+
+		// Close workbook and input stream
+		workbook.close();
+		fileInputStream.close();
 	}
 
 	public static void getClaimsStatus(FileInputStream fileInputStream, Sheet sheet) throws IOException {
@@ -112,145 +119,9 @@ public class ExcelEvaluator {
 			}
 		}
 		System.out.println(
-				"Claims In Review :" + countReview + "\n Claims having no status : " + countNoStatus + "\n Claims that are Approved :" + countApproved + "\n");
+				"Claims In Review :" + countReview + "\nClaims having no status : " + countNoStatus + "\nClaims that are Approved :" + countApproved + "\n");
 	}
-
-	public static void getClaimApprovedAndSubmittedStatus(String file) throws IOException {
-
-		FileInputStream inputStream = new FileInputStream(file);
-		Workbook workbook = WorkbookFactory.create(inputStream);
-
-		// Get sheet and rows
-		Sheet sheet = workbook.getSheetAt(0);
-		List<Row> rows = new ArrayList<Row>();
-		sheet.forEach(row -> rows.add(row));
-
-		// Remove header row
-		rows.remove(0);
-
-		// Initialize maps to store counts
-		Map<Integer, Integer> yearCount = new HashMap<Integer, Integer>();
-		Map<Integer, Map<Integer, Integer>> yearMonthCount = new HashMap<Integer, Map<Integer, Integer>>();
-		Map<Integer, Map<Integer, Integer>> yearQuarterCount = new HashMap<Integer, Map<Integer, Integer>>();
-
-		// Loop through rows to count approvals by year, month, and quarter
-		for (Row row : rows) {
-
-			// Get submission date and claim status
-			Cell submissionDateCell = row.getCell(6);
-			Cell claimStatusCell = row.getCell(7);
-
-			if (submissionDateCell.getCellType() == CellType.NUMERIC
-					&& DateUtil.isCellDateFormatted(submissionDateCell)) {
-
-				// Get year and month from submission date
-
-				Calendar cal = Calendar.getInstance();
-				cal.setTime(submissionDateCell.getDateCellValue());
-
-				int year = cal.get(Calendar.YEAR);
-				int month = cal.get(Calendar.MONTH) + 1; // Add 1 to match with Excel month index
-
-				// Update year count
-				if (claimStatusCell.getStringCellValue().equalsIgnoreCase("Approved")) {
-					yearCount.put(year, yearCount.getOrDefault(year, 0) + 1);
-
-					// Update month count
-					Map<Integer, Integer> monthCount = yearMonthCount.getOrDefault(year,
-							new HashMap<Integer, Integer>());
-					monthCount.put(month, monthCount.getOrDefault(month, 0) + 1);
-					yearMonthCount.put(year, monthCount);
-
-					// Update quarter count
-					int quarter = (month - 1) / 3 + 1; // Calculate quarter based on month index
-					Map<Integer, Integer> quarterCount = yearQuarterCount.getOrDefault(year,
-							new HashMap<Integer, Integer>());
-					quarterCount.put(quarter, quarterCount.getOrDefault(quarter, 0) + 1);
-					yearQuarterCount.put(year, quarterCount);
-				}
-			}
-		}
-
-		Map<Integer, Integer> claimYearCount = new HashMap<Integer, Integer>();
-		Map<Integer, Map<Integer, Integer>> claimYearMonthCount = new HashMap<Integer, Map<Integer, Integer>>();
-		Map<Integer, Map<Integer, Integer>> claimYearQuarterCount = new HashMap<Integer, Map<Integer, Integer>>();
-
-		// Loop through rows to count submissions by year, month, and quarter
-		for (Row row : rows) {
-			// Get submission date and claimed amount
-			Cell submissionDateCell = row.getCell(6);
-			Cell claimedAmountCell = row.getCell(5);
-			if (submissionDateCell.getCellType() == CellType.NUMERIC
-					&& DateUtil.isCellDateFormatted(submissionDateCell)) {
-
-				// Get year and month from submission date
-				Calendar cal = Calendar.getInstance();
-				cal.setTime(submissionDateCell.getDateCellValue());
-
-				int year = cal.get(Calendar.YEAR);
-				int month = cal.get(Calendar.MONTH) + 1; // Add 1 to match with Excel month index
-
-				// Update year count
-				claimYearCount.put(year, claimYearCount.getOrDefault(year, 0) + 1);
-
-				// Update month count
-				Map<Integer, Integer> monthCount = claimYearMonthCount.getOrDefault(year,
-						new HashMap<Integer, Integer>());
-				monthCount.put(month, monthCount.getOrDefault(month, 0) + 1);
-				claimYearMonthCount.put(year, monthCount);
-
-				// Update quarter count
-				int quarter = (month - 1) / 3 + 1; // Calculate quarter based on month index
-
-				Map<Integer, Integer> quarterCount = claimYearQuarterCount.getOrDefault(year,
-						new HashMap<Integer, Integer>());
-				quarterCount.put(quarter, quarterCount.getOrDefault(quarter, 0) + 1);
-				claimYearQuarterCount.put(year, quarterCount);
-			}
-		}
-
-		// Print year count
-		System.out.println("Count by year:");
-		for (int year : yearCount.keySet()) {
-
-			System.out.println(year + " Approved : " + yearCount.get(year));
-			System.out.println(year + " Claimed: " + claimYearCount.get(year));
-		}
-
-		// Print month count
-		System.out.println("Count by month:");
-		for (int year : yearMonthCount.keySet()) {
-
-			System.out.println("In " + year + ":");
-
-			for (int month : yearMonthCount.get(year).keySet()) {
-				System.out.println("month " + month + " Approved : " + yearMonthCount.get(year).get(month));
-			}
-
-			for (int month : claimYearMonthCount.get(year).keySet()) {
-				System.out.println("Month " + month + " Claimed: " + claimYearMonthCount.get(year).get(month));
-			}
-		}
-
-		// Print quarter count
-		System.out.println("Count by quarter:");
-		for (int year : claimYearCount.keySet()) {
-
-			System.out.println(year + ": ");
-
-			for (int quarter : yearQuarterCount.get(year).keySet()) {
-				System.out.println("Quarter " + quarter + " Approved : " + yearQuarterCount.get(year).get(quarter));
-			}
-
-			for (int quarter : claimYearQuarterCount.get(year).keySet()) {
-				System.out.println("Quarter " + quarter + " Claimed : " + claimYearQuarterCount.get(year).get(quarter));
-			}
-		}
-
-		// Close workbook and input stream
-		workbook.close();
-		inputStream.close();
-	}
+	
 
 	public static void getCategoryWiseClaims(String file) {
 		Map<String, Double> categoryWiseTotalApprovedAmount = new HashMap<>();
@@ -330,5 +201,146 @@ public class ExcelEvaluator {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+	
+	public static void getClaimApprovedAndSubmittedStatus(FileInputStream inputStream, Sheet sheet) throws IOException {
+
+		List<Row> rows = new ArrayList<Row>();
+		sheet.forEach(row -> rows.add(row));
+
+		// Remove header row
+		rows.remove(0);
+
+		// Initialize maps to store counts
+		Map<Integer, Integer> yearCount = new HashMap<Integer, Integer>();
+		Map<Integer, Map<Integer, Integer>> yearMonthCount = new HashMap<Integer, Map<Integer, Integer>>();
+		Map<Integer, Map<Integer, Integer>> yearQuarterCount = new HashMap<Integer, Map<Integer, Integer>>();
+
+		// Loop through rows to count approvals by year, month, and quarter
+		for (Row row : rows) {
+
+			// Get submission date and claim status
+			Cell submissionDateCell = row.getCell(6);
+
+			Cell claimStatusCell = row.getCell(7);
+
+			if (submissionDateCell.getCellType() == CellType.NUMERIC
+					&& DateUtil.isCellDateFormatted(submissionDateCell)) {
+
+				// Get year and month from submission date
+				Calendar cal = Calendar.getInstance();
+
+				cal.setTime(submissionDateCell.getDateCellValue());
+
+				int year = cal.get(Calendar.YEAR);
+
+				int month = cal.get(Calendar.MONTH) + 1; // Add 1 to match with Excel month index
+
+				// Update year count
+				if (claimStatusCell.getStringCellValue().equalsIgnoreCase("Approved")) {
+
+					yearCount.put(year, yearCount.getOrDefault(year, 0) + 1);
+
+					// Update month count
+					Map<Integer, Integer> monthCount = yearMonthCount.getOrDefault(year,
+							new HashMap<Integer, Integer>());
+
+					monthCount.put(month, monthCount.getOrDefault(month, 0) + 1);
+
+					yearMonthCount.put(year, monthCount);
+
+					// Update quarter count
+					int quarter = (month - 1) / 3 + 1; // Calculate quarter based on month index
+
+					Map<Integer, Integer> quarterCount = yearQuarterCount.getOrDefault(year,
+							new HashMap<Integer, Integer>());
+
+					quarterCount.put(quarter, quarterCount.getOrDefault(quarter, 0) + 1);
+
+					yearQuarterCount.put(year, quarterCount);
+
+				}
+
+			}
+		}
+
+		Map<Integer, Integer> claimYearCount = new HashMap<Integer, Integer>();
+		Map<Integer, Map<Integer, Integer>> claimYearMonthCount = new HashMap<Integer, Map<Integer, Integer>>();
+		Map<Integer, Map<Integer, Integer>> claimYearQuarterCount = new HashMap<Integer, Map<Integer, Integer>>();
+
+		// Loop through rows to count submissions by year, month, and quarter
+		for (Row row : rows) {
+
+			// Get submission date and claimed amount
+			Cell submissionDateCell = row.getCell(6);
+			Cell claimedAmountCell = row.getCell(5);
+
+			if (submissionDateCell.getCellType() == CellType.NUMERIC
+					&& DateUtil.isCellDateFormatted(submissionDateCell)) {
+
+				// Get year and month from submission date
+				Calendar cal = Calendar.getInstance();
+				cal.setTime(submissionDateCell.getDateCellValue());
+
+				int year = cal.get(Calendar.YEAR);
+				int month = cal.get(Calendar.MONTH) + 1; // Add 1 to match with Excel month index
+
+				// Update year count
+				claimYearCount.put(year, claimYearCount.getOrDefault(year, 0) + 1);
+
+				// Update month count
+				Map<Integer, Integer> monthCount = claimYearMonthCount.getOrDefault(year,
+						new HashMap<Integer, Integer>());
+				monthCount.put(month, monthCount.getOrDefault(month, 0) + 1);
+				claimYearMonthCount.put(year, monthCount);
+
+				// Update quarter count
+				int quarter = (month - 1) / 3 + 1; // Calculate quarter based on month index
+
+				Map<Integer, Integer> quarterCount = claimYearQuarterCount.getOrDefault(year,
+						new HashMap<Integer, Integer>());
+				quarterCount.put(quarter, quarterCount.getOrDefault(quarter, 0) + 1);
+				claimYearQuarterCount.put(year, quarterCount);
+
+			}
+		}
+
+		// Print year count
+		System.out.println("Count by year:");
+		for (int year : yearCount.keySet()) {
+			System.out.println(year + "\tClaimed" + "\tApproved");
+			System.out.println("\t" + claimYearCount.get(year) + "\t" + yearCount.get(year));
+		}
+
+		// Print quarter count
+		System.out.println("Count by quarter:");
+		for (int year : claimYearCount.keySet()) {
+			System.out.println(year + ": ");
+			for (int quarter : claimYearQuarterCount.get(year).keySet()) {
+				System.out.println("Quarter " + quarter + ": \tClaimed" + "\tApproved");
+				System.out.println("\t" + "\t" + claimYearQuarterCount.get(year).get(quarter) + "\t"
+						+ ((yearQuarterCount.containsKey(year) && yearQuarterCount.get(year) != null
+								&& yearQuarterCount.get(year).containsKey(quarter))
+										? yearQuarterCount.get(year).get(quarter)
+										: 0));
+
+			}
+		}
+		// Print month count
+		System.out.println("Count by month:");
+		for (int year : yearMonthCount.keySet()) {
+
+			System.out.println("In " + year + ":");
+
+			for (int month : claimYearMonthCount.get(year).keySet()) {
+				System.out.println(
+						"Month " + new DateFormatSymbols().getMonths()[month - 1] + "\tClaimed" + "\tApproved");
+				System.out.println("\t" + "\t" + claimYearMonthCount.get(year).get(month) + "\t"
+						+ ((yearMonthCount.containsKey(year) && yearMonthCount.get(year) != null
+								&& yearMonthCount.get(year).containsKey(month)) ? yearMonthCount.get(year).get(month)
+										: 0));
+			}
+		}
+		System.out.println('\n');
 	}
 }
