@@ -13,6 +13,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.InputMismatchException;
 import java.util.Map;
 
 import org.apache.poi.ss.usermodel.Cell;
@@ -27,56 +28,66 @@ import java.util.Scanner;
 public class ExcelEvaluator {
 
 	public static void evaluate(String filename) throws EncryptedDocumentException, IOException {
-
-		// Open the Excel file
-		FileInputStream fileInputStream = new FileInputStream(new File(filename));
-		Workbook workbook = WorkbookFactory.create(fileInputStream);
-
-		// Get the first sheet
-		Sheet sheet = workbook.getSheetAt(0);
-
-		Scanner input = new Scanner(System.in);
-
-		do {
-			System.out.println("\n Press '1' to get Claims Status(Approved, In review and No status) "
-					+ "\n Press '2' to get Category wise total approved claim amount. "
-					+ "\n Press '3' to get Monthly/Quarterly/Yearly claims submission vs approvals."
-					+ "\n Press '4' to get Projected Category wise claims for the next quarter, based on the current trend."
-					+ "\n Press '5' to get all the evaluations.");
-
-			System.out.print("Enter your choice : ");
-			int choice = input.nextInt();
-
-			switch (choice) {
-			case 1:
-				getClaimsStatus(fileInputStream, sheet);
-				break;
-			case 2:
-				getCategoryWiseClaims(filename);
-				break;
-			case 3:
-				getClaimApprovedAndSubmittedStatus(fileInputStream, sheet);
-				break;
-			case 4:
-				claimProjections(filename);
-				break;
-			case 5:
-				getClaimsStatus(fileInputStream, sheet);
-				getCategoryWiseClaims(filename);
-				getClaimApprovedAndSubmittedStatus(fileInputStream, sheet);
-				claimProjections(filename);
-				break;
-			default:
-				System.out.println("Invalid input. Please enter a number between 1 and 5.");
-				break;
-			}
-			System.out.print("\nDo you want to see more evaluations ? (For YES press 'Y'/ For NO press any value ): ");
-		} while (input.next().equalsIgnoreCase("y"));
 		
-		// Close workbook and input stream
-		workbook.close();
-		fileInputStream.close();
-		System.out.println("Thank you !!");		
+		FileInputStream fileInputStream = null;
+		Workbook workbook = null;
+		try {
+			// Open the Excel file
+			fileInputStream = new FileInputStream(new File(filename));
+			workbook = WorkbookFactory.create(fileInputStream);
+			int choice = 0;
+
+			// Get the first sheet
+			Sheet sheet = workbook.getSheetAt(0);
+			Scanner input = new Scanner(System.in);
+
+			do {
+				System.out.println("\n Press '1' to get Claims Status(Approved, In review and No status) "
+						+ "\n Press '2' to get Category wise total approved claim amount. "
+						+ "\n Press '3' to get Monthly/Quarterly/Yearly claims submission vs approvals."
+						+ "\n Press '4' to get Projected Category wise claims for the next quarter, based on the current trend."
+						+ "\n Press '5' to get all the evaluations.");
+
+				System.out.print("Enter your choice : ");
+				try {
+				  choice = input.nextInt();
+				}catch(InputMismatchException e) {
+					System.out.println("Re run and Enter only 1-5 values");
+					return;
+				}				
+
+				switch (choice) {
+				case 1:
+					getClaimsStatus(fileInputStream, sheet);
+					break;
+				case 2:
+					getCategoryWiseClaims(filename);
+					break;
+				case 3:
+					getClaimApprovedAndSubmittedStatus(fileInputStream, sheet);
+					break;
+				case 4:
+					claimProjections(filename);
+					break;
+				case 5:
+					getClaimsStatus(fileInputStream, sheet);
+					getCategoryWiseClaims(filename);
+					getClaimApprovedAndSubmittedStatus(fileInputStream, sheet);
+					claimProjections(filename);
+					break;
+				default:
+					System.out.println("Invalid input. Please enter a number between 1 and 5.");
+					break;
+				}
+				System.out.print("\nDo you want to see more evaluations ? (For YES press 'Y'/ For NO press any value ): ");
+			} while (input.next().equalsIgnoreCase("y"));
+			System.out.println("Thank you !!");		
+			
+		}finally {
+			// Close workbook and input stream
+			if(workbook != null) workbook.close();
+			if(fileInputStream != null)fileInputStream.close();			
+		}
 	}
 
 	public static void getClaimsStatus(FileInputStream fileInputStream, Sheet sheet) throws IOException {
@@ -100,14 +111,15 @@ public class ExcelEvaluator {
 			}
 		}
 		System.out.println(
-				"Claims In Review :" + countReview + "\nClaims having no status : " + countNoStatus + "\nClaims that are Approved :" + countApproved + "\n");
+				"\nClaims In Review :" + countReview + "\nClaims having no status : " + countNoStatus + "\nClaims that are Approved :" + countApproved + "\n");
 	}
 	
 
-	public static void getCategoryWiseClaims(String file) {
+	public static void getCategoryWiseClaims(String file) throws IOException {
 		Map<String, Double> categoryWiseTotalApprovedAmount = new HashMap<>();
+		XSSFWorkbook workbook = null;
 		try {
-			XSSFWorkbook workbook = new XSSFWorkbook(new File(file));
+			workbook = new XSSFWorkbook(new File(file));
 			Sheet sheet = workbook.getSheetAt(0);
 			Row columnNamesRow = sheet.getRow(1);
 			int claimCategoryIndex = -1;
@@ -133,20 +145,23 @@ public class ExcelEvaluator {
 				System.out.println("Category: " + category + ", Total approved amount: "
 						+ categoryWiseTotalApprovedAmount.get(category));
 			}
-			workbook.close();
+			
 		} catch (Exception e) {
 			e.printStackTrace();
+		}finally {
+			workbook.close();
 		}
 	}
 
-	public static void claimProjections(String filePath) {
+	public static void claimProjections(String filePath) throws IOException {
 		int currentQuarter = 2; // Assuming the current quarter is Q2
 		int totalQuarters = 4; // Assuming 4 quarters in a year
 		int numPastQuarters = 3; // We want to calculate the average of the last 3 quarters
 		Map<String, Double> categoryWisePastClaims = new HashMap<>();
 		Map<String, Double> categoryWiseProjectedClaims = new HashMap<>();
+		XSSFWorkbook workbook = null;
 		try {
-			XSSFWorkbook workbook = new XSSFWorkbook(new File(filePath));
+			workbook = new XSSFWorkbook(new File(filePath));
 			Sheet sheet = workbook.getSheetAt(0);
 			Row columnNamesRow = sheet.getRow(0);
 			int categoryIndex = -1;
@@ -177,10 +192,11 @@ public class ExcelEvaluator {
 			for (String category : categoryWiseProjectedClaims.keySet()) {
 				System.out.println("Category: " + category + ", Projected claims for next quarter: "
 						+ new DecimalFormat("#.##").format(categoryWiseProjectedClaims.get(category)));
-			}
-			workbook.close();
+			}			
 		} catch (Exception e) {
 			e.printStackTrace();
+		} finally {
+			workbook.close();
 		}
 	}
 	
@@ -239,9 +255,7 @@ public class ExcelEvaluator {
 					quarterCount.put(quarter, quarterCount.getOrDefault(quarter, 0) + 1);
 
 					yearQuarterCount.put(year, quarterCount);
-
 				}
-
 			}
 		}
 
@@ -287,7 +301,7 @@ public class ExcelEvaluator {
 		}
 
 		// Print year count
-		System.out.println("Count by year:");
+		System.out.println("\nCount by year:");
 		for (int year : yearCount.keySet()) {
 			System.out.println(year + "\tClaimed" + "\tApproved");
 			System.out.println("\t" + claimYearCount.get(year) + "\t" + yearCount.get(year));
