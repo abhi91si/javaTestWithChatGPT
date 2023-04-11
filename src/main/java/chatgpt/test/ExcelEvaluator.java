@@ -97,7 +97,6 @@ public class ExcelEvaluator {
 		boolean flagForDate = Boolean.FALSE;
 
 		List<String> approvalDates = ExcelUtil.getColumnValueInList(fileInputStream, sheet, columnname, flagForDate);
-		System.out.println("data in list :");
 		int countReview = 0;
 		int countNoStatus = 0;
 		int countApproved = 0;
@@ -113,7 +112,7 @@ public class ExcelEvaluator {
 			}
 		}
 		System.out.println(
-				"in review :" + countReview + " no status : " + countNoStatus + " approved :" + countApproved + "\n");
+				"Claims In Review :" + countReview + "\n Claims having no status : " + countNoStatus + "\n Claims that are Approved :" + countApproved + "\n");
 	}
 
 	public static void getClaimApprovedAndSubmittedStatus(String file) throws IOException {
