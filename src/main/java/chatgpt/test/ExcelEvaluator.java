@@ -28,7 +28,7 @@ import java.util.Scanner;
 public class ExcelEvaluator {
 
 	public static void evaluate(String filename) throws EncryptedDocumentException, IOException {
-		
+
 		FileInputStream fileInputStream = null;
 		Workbook workbook = null;
 		try {
@@ -50,11 +50,11 @@ public class ExcelEvaluator {
 
 				System.out.print("Enter your choice : ");
 				try {
-				  choice = input.nextInt();
-				}catch(InputMismatchException e) {
+					choice = input.nextInt();
+				} catch (InputMismatchException e) {
 					System.out.println("Re run and Enter only 1-5 values");
 					return;
-				}				
+				}
 
 				switch (choice) {
 				case 1:
@@ -79,14 +79,17 @@ public class ExcelEvaluator {
 					System.out.println("Invalid input. Please enter a number between 1 and 5.");
 					break;
 				}
-				System.out.print("\nDo you want to see more evaluations ? (For YES press 'Y'/ For NO press any value ): ");
+				System.out.print(
+						"\nDo you want to see more evaluations ? (For YES press 'Y'/ For NO press any value ): ");
 			} while (input.next().equalsIgnoreCase("y"));
-			System.out.println("Thank you !!");		
-			
-		}finally {
+			System.out.println("Thank you !!");
+
+		} finally {
 			// Close workbook and input stream
-			if(workbook != null) workbook.close();
-			if(fileInputStream != null)fileInputStream.close();			
+			if (workbook != null)
+				workbook.close();
+			if (fileInputStream != null)
+				fileInputStream.close();
 		}
 	}
 
@@ -110,10 +113,9 @@ public class ExcelEvaluator {
 				countNoStatus++;
 			}
 		}
-		System.out.println(
-				"\nClaims In Review :" + countReview + "\nClaims having no status : " + countNoStatus + "\nClaims that are Approved :" + countApproved + "\n");
+		System.out.println("\nClaims In Review :" + countReview + "\nClaims having no status : " + countNoStatus
+				+ "\nClaims that are Approved :" + countApproved + "\n");
 	}
-	
 
 	public static void getCategoryWiseClaims(String file) throws IOException {
 		Map<String, Double> categoryWiseTotalApprovedAmount = new HashMap<>();
@@ -145,10 +147,10 @@ public class ExcelEvaluator {
 				System.out.println("Category: " + category + ", Total approved amount: "
 						+ categoryWiseTotalApprovedAmount.get(category));
 			}
-			
+
 		} catch (Exception e) {
 			e.printStackTrace();
-		}finally {
+		} finally {
 			workbook.close();
 		}
 	}
@@ -192,14 +194,14 @@ public class ExcelEvaluator {
 			for (String category : categoryWiseProjectedClaims.keySet()) {
 				System.out.println("Category: " + category + ", Projected claims for next quarter: "
 						+ new DecimalFormat("#.##").format(categoryWiseProjectedClaims.get(category)));
-			}			
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
 			workbook.close();
 		}
 	}
-	
+
 	public static void getClaimApprovedAndSubmittedStatus(FileInputStream inputStream, Sheet sheet) throws IOException {
 
 		List<Row> rows = new ArrayList<Row>();
@@ -218,7 +220,6 @@ public class ExcelEvaluator {
 
 			// Get submission date and claim status
 			Cell submissionDateCell = row.getCell(6);
-
 			Cell claimStatusCell = row.getCell(7);
 
 			if (submissionDateCell.getCellType() == CellType.NUMERIC
@@ -230,20 +231,17 @@ public class ExcelEvaluator {
 				cal.setTime(submissionDateCell.getDateCellValue());
 
 				int year = cal.get(Calendar.YEAR);
-
 				int month = cal.get(Calendar.MONTH) + 1; // Add 1 to match with Excel month index
 
 				// Update year count
 				if (claimStatusCell.getStringCellValue().equalsIgnoreCase("Approved")) {
 
 					yearCount.put(year, yearCount.getOrDefault(year, 0) + 1);
-
 					// Update month count
 					Map<Integer, Integer> monthCount = yearMonthCount.getOrDefault(year,
 							new HashMap<Integer, Integer>());
 
 					monthCount.put(month, monthCount.getOrDefault(month, 0) + 1);
-
 					yearMonthCount.put(year, monthCount);
 
 					// Update quarter count
@@ -251,9 +249,7 @@ public class ExcelEvaluator {
 
 					Map<Integer, Integer> quarterCount = yearQuarterCount.getOrDefault(year,
 							new HashMap<Integer, Integer>());
-
 					quarterCount.put(quarter, quarterCount.getOrDefault(quarter, 0) + 1);
-
 					yearQuarterCount.put(year, quarterCount);
 				}
 			}
@@ -296,7 +292,6 @@ public class ExcelEvaluator {
 						new HashMap<Integer, Integer>());
 				quarterCount.put(quarter, quarterCount.getOrDefault(quarter, 0) + 1);
 				claimYearQuarterCount.put(year, quarterCount);
-
 			}
 		}
 
@@ -318,7 +313,6 @@ public class ExcelEvaluator {
 								&& yearQuarterCount.get(year).containsKey(quarter))
 										? yearQuarterCount.get(year).get(quarter)
 										: 0));
-
 			}
 		}
 		// Print month count

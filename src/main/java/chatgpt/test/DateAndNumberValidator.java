@@ -37,8 +37,10 @@ public class DateAndNumberValidator {
 			checkForValidDates(fileInputStream, sheet);
 		} finally {
 			// Close the Excel file
-			if(fileInputStream != null) fileInputStream.close();
-			if(workbook != null) workbook.close();
+			if (fileInputStream != null)
+				fileInputStream.close();
+			if (workbook != null)
+				workbook.close();
 		}
 	}
 
@@ -112,7 +114,8 @@ public class DateAndNumberValidator {
 		for (String date : listWithDate) {
 			Matcher matcher = pattern.matcher(date);
 			if (!matcher.matches()) {
-				throw new ExcelException("Date has to be in dd/mm/yyyy format, Also check date, month and year, CHECK :" + date);
+				throw new ExcelException(
+						"Date has to be in dd/mm/yyyy format, Also check date, month and year, CHECK :" + date);
 			}
 		}
 	}
