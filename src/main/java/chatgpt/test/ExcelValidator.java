@@ -21,7 +21,7 @@ public class ExcelValidator {
 
 	public void validateExcel(String filename) throws IOException, ExcelException {
 		Workbook workbook = null;
-		Sheet sheet =null;
+		Sheet sheet = null;
 		try {
 			ExcelValidator reader = new ExcelValidator();
 			reader.validateFileExtension(filename);
@@ -31,12 +31,13 @@ public class ExcelValidator {
 			// read Excel file
 			try {
 				workbook = WorkbookFactory.create(file);
-				sheet = workbook.getSheetAt(0);				
-			}catch(Exception e) {
+				sheet = workbook.getSheetAt(0);
+			} catch (Exception e) {
 				throw new ExcelException("Please close the file if openned or Check if file is a valid Excel file !!!");
-			}finally {
-				if(workbook != null) workbook.close();
-			}	
+			} finally {
+				if (workbook != null)
+					workbook.close();
+			}
 
 			reader.validateColumnNames(sheet);
 			System.out.println("Column names are validated");

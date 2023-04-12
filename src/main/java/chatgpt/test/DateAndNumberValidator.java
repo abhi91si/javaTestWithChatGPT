@@ -39,10 +39,10 @@ public class DateAndNumberValidator {
 					+ "\n that your dates are in correct format. \nEnter your choice:");
 			Scanner in = new Scanner(System.in);
 			String input = in.nextLine();
-			if(input.equalsIgnoreCase("Y")) {
+			if (input.equalsIgnoreCase("Y")) {
 				checkForValidDates(fileInputStream, sheet);
 				System.out.println("\nDates are validated");
-			}			
+			}
 		} finally {
 			// Close the Excel file
 			if (fileInputStream != null)
@@ -82,7 +82,7 @@ public class DateAndNumberValidator {
 		}
 		boolean checkClaim = checkForValidAmount(claim);
 		boolean checkApprove = checkForValidAmount(approve);
-		if(checkApprove && checkClaim) {
+		if (checkApprove && checkClaim) {
 			System.out.println("Amounts are validated");
 		}
 	}
@@ -111,7 +111,7 @@ public class DateAndNumberValidator {
 				}
 			} catch (NumberFormatException e) {
 				throw new ExcelException("check the Amount value, " + e.getMessage());
-			}			
+			}
 		}
 		return Boolean.TRUE;
 	}
