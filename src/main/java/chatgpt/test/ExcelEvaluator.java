@@ -57,32 +57,33 @@ public class ExcelEvaluator {
 				}
 
 				switch (choice) {
-				case 1:
-					getClaimsStatus(fileInputStream, sheet);
-					break;
-				case 2:
-					getCategoryWiseClaims(filename);
-					break;
-				case 3:
-					getClaimApprovedAndSubmittedStatus(fileInputStream, sheet);
-					break;
-				case 4:
-					claimProjections(filename);
-					break;
-				case 5:
-					getClaimsStatus(fileInputStream, sheet);
-					getCategoryWiseClaims(filename);
-					getClaimApprovedAndSubmittedStatus(fileInputStream, sheet);
-					claimProjections(filename);
-					break;
-				default:
-					System.out.println("Invalid input. Please enter a number between 1 and 5.");
-					break;
+					case 1:
+						getClaimsStatus(fileInputStream, sheet);
+						break;
+					case 2:
+						getCategoryWiseClaims(filename);
+						break;
+					case 3:
+						getClaimApprovedAndSubmittedStatus(fileInputStream, sheet);
+						break;
+					case 4:
+						claimProjections(filename);
+						break;
+					case 5:
+						getClaimsStatus(fileInputStream, sheet);
+						getCategoryWiseClaims(filename);
+						getClaimApprovedAndSubmittedStatus(fileInputStream, sheet);
+						claimProjections(filename);
+						break;
+					default:
+						System.out.println("Invalid input. Please enter a number between 1 and 5.");
+						break;
 				}
 				System.out.print(
 						"\nDo you want to see more evaluations ? (For YES press 'Y'/ For NO press any value ): ");
 			} while (input.next().equalsIgnoreCase("y"));
 			System.out.println("Thank you !!");
+			input.close();
 
 		} finally {
 			// Close workbook and input stream
