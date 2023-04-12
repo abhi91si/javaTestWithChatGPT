@@ -44,10 +44,10 @@ public class ExcelValidator {
 					workbook.close();
 			}
 
-			reader.validateColumnNames(sheet);
-			System.out.println("Column names are validated");
 			reader.validateColumnNumber(sheet);
 			System.out.println("Column numbers are validated");
+			reader.validateColumnNames(sheet);
+			System.out.println("Column names are validated");
 			reader.checkDuplicateRowsAndColumns(sheet);
 			System.out.println("If duplicate data exists is validated");
 
