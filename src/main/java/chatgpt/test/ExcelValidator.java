@@ -2,6 +2,7 @@ package chatgpt.test;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.FileInputStream;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -28,6 +29,7 @@ public class ExcelValidator {
 			System.out.println("File extension is validated");
 			File file = new File(filename);
 
+			checkEmptyExcelFile(filename);
 			// read Excel file
 			try {
 				workbook = WorkbookFactory.create(file);
@@ -114,4 +116,19 @@ public class ExcelValidator {
 			throw new ExcelException("Error: Invalid file format or file not found.");
 		}
 	}
+	
+    public void checkEmptyExcelFile(String filename) throws IOException, ExcelException {
+    	FileInputStream fis = new FileInputStream(new File(filename));
+    	Workbook workbook = null;
+        try {
+            workbook = WorkbookFactory.create(fis);
+            Sheet sheet = workbook.getSheetAt(0);
+            if (sheet.getLastRowNum() <= 0) {
+                throw new ExcelException("The Excel file is empty.");
+            }
+        }finally {
+        	if (fis != null) fis.close();
+        	if (workbook != null) workbook.close();
+        }
+    }
 }
