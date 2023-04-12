@@ -32,6 +32,9 @@ public class ExcelValidator {
 			try {
 				workbook = WorkbookFactory.create(file);
 				sheet = workbook.getSheetAt(0);
+				if (sheet.getLastRowNum() <= 0) {
+					throw new ExcelException("File is empty");
+				}
 			} catch (Exception e) {
 				throw new ExcelException("Please close the file if openned or Check if file is a valid Excel file !!!");
 			} finally {
