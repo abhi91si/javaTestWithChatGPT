@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.ArrayList;
@@ -34,7 +35,14 @@ public class DateAndNumberValidator {
 			// Get the first sheet
 			Sheet sheet = workbook.getSheetAt(0);
 			checkForValidAmount(fileInputStream, sheet);
-			checkForValidDates(fileInputStream, sheet);
+			System.out.println("\nIf you want to validate Dates, press 'Y', if NO make sure"
+					+ "\n that your dates are in correct format. \nEnter your choice:");
+			Scanner in = new Scanner(System.in);
+			String input = in.nextLine();
+			if(input.equalsIgnoreCase("Y")) {
+				checkForValidDates(fileInputStream, sheet);
+				System.out.println("\nDates are validated");
+			}			
 		} finally {
 			// Close the Excel file
 			if (fileInputStream != null)
@@ -72,8 +80,11 @@ public class DateAndNumberValidator {
 				approve.add(approvedAmountString);
 			}
 		}
-		checkForValidAmount(claim);
-		checkForValidAmount(approve);
+		boolean checkClaim = checkForValidAmount(claim);
+		boolean checkApprove = checkForValidAmount(approve);
+		if(checkApprove && checkClaim) {
+			System.out.println("Amounts are validated");
+		}
 	}
 
 	private void checkForValidDates(FileInputStream fileInputStream, Sheet sheet) throws ExcelException {
@@ -90,7 +101,7 @@ public class DateAndNumberValidator {
 	}
 
 	// checking if List has Integer objects
-	private void checkForValidAmount(List<String> list) throws ExcelException {
+	private boolean checkForValidAmount(List<String> list) throws ExcelException {
 		for (String obj : list) {
 			try {
 				int amount = Integer.parseInt(obj);
@@ -100,9 +111,9 @@ public class DateAndNumberValidator {
 				}
 			} catch (NumberFormatException e) {
 				throw new ExcelException("check the Amount value, " + e.getMessage());
-			}
+			}			
 		}
-
+		return Boolean.TRUE;
 	}
 
 	// checking if List has strings that can be parsed as dates

@@ -21,18 +21,29 @@ public class ExcelValidator {
 
 	public void validateExcel(String filename) throws IOException, ExcelException {
 		Workbook workbook = null;
+		Sheet sheet =null;
 		try {
 			ExcelValidator reader = new ExcelValidator();
 			reader.validateFileExtension(filename);
+			System.out.println("File extension is validated");
 			File file = new File(filename);
 
 			// read Excel file
-			workbook = WorkbookFactory.create(file);
-			Sheet sheet = workbook.getSheetAt(0);
+			try {
+				workbook = WorkbookFactory.create(file);
+				sheet = workbook.getSheetAt(0);				
+			}catch(Exception e) {
+				throw new ExcelException("Please close the file if openned or Check if file is a valid Excel file !!!");
+			}finally {
+				if(workbook != null) workbook.close();
+			}	
 
 			reader.validateColumnNames(sheet);
+			System.out.println("Column names are validated");
 			reader.validateColumnNumber(sheet);
+			System.out.println("Column numbers are validated");
 			reader.checkDuplicateRowsAndColumns(sheet);
+			System.out.println("If duplicate data exists is validated");
 
 			// check number format
 			DateAndNumberValidator dateAndNumberValidator = new DateAndNumberValidator();
